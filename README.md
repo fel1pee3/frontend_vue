@@ -4,7 +4,7 @@ Projeto didático para aprendizado de Vue.js consumindo API Flask.
 
 ## Sobre o Curso
 
-Este curso de 12 aulas ensina Vue.js de forma prática, construindo uma aplicação frontend que consome a API do projeto Backend Flask. Cada aula está em uma branch separada, permitindo evolução incremental.
+Nste curso de 12 aulas vamos aprender a usar o Vue.js de forma prática, construindo uma aplicação frontend que consome a API do projeto Backend Flask. 
 
 ## Pré-requisitos
 
