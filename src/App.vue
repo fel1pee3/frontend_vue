@@ -82,38 +82,6 @@ export default {
   name: 'App',
   components: {
     HelloWorld
-  },
-  data() {
-    return {
-      backendStatus: {
-        connected: false,
-        message: 'Verificando conexão...'
-      }
-    }
-  },
-  async mounted() {
-    // Tentar conectar com o backend Flask
-    await this.verificarBackend()
-  },
-  methods: {
-    async verificarBackend() {
-      try {
-        const response = await fetch('http://localhost:5000/api/dados')
-        if (response.ok) {
-          this.backendStatus = {
-            connected: true,
-            message: 'Backend Flask respondendo em localhost:5000'
-          }
-        } else {
-          throw new Error('Backend retornou erro')
-        }
-      } catch (error) {
-        this.backendStatus = {
-          connected: false,
-          message: 'Certifique-se de que o backend Flask está rodando'
-        }
-      }
-    }
   }
 }
 </script>
