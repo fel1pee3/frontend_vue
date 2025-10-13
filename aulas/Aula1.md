@@ -219,6 +219,8 @@ Olá, Rodrigo!
 Sem precisar usar um document.querySelector ou onChange — o Vue cuida de tudo.
 
 #### 2. **Event Handling**
+
+O Event Handling (tratamento de eventos) é a forma de reagir a interações do usuário, como cliques e envios de formulários.
 ```vue
 <template>
   <div>
@@ -250,8 +252,17 @@ export default {
 }
 </script>
 ```
+Explicações:
+
+- @click é um atalho para v-on:click — usado pra escutar eventos.
+- @submit.prevent evita que o formulário recarregue a página.
+- Os métodos dentro de methods são chamados quando os eventos disparam.
+
 
 #### 3. **Reatividade**
+
+A reatividade é o coração do Vue.
+Quando você altera um dado dentro do data(), qualquer lugar do template que dependa dele é atualizado automaticamente.
 ```vue
 <template>
   <div>
@@ -292,6 +303,15 @@ export default {
 }
 </script>
 ```
+Explicações:
+- data(): contém a lista de itens do carrinho.
+- computed: propriedades reativas que calculam valores derivados dos dados:
+- totalItens: quantidade de itens no carrinho.
+- valorTotal: soma dos preços de todos os itens.
+- methods: funções que alteram os dados.
+- adicionarItem(): adiciona um novo produto à lista.
+
+Quando clicamos em Adicionar Item, a lista itens é atualizada, e o Vue recalcula automaticamente totalItens e valorTotal, mostrando na tela sem precisar mexer no DOM manualmente.
 
 ---
 
