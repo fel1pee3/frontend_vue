@@ -40,6 +40,11 @@ Vue.js é um framework JavaScript progressivo para construção de interfaces de
 node --version
 npm --version
 ```
+#### Criando nosso projeto
+```bash
+#Isso vai criar o diretório do nosso projeto
+npm create vue@latest "Primeira Aula Vue"
+```
 
 #### Instalando Dependências
 ```bash
