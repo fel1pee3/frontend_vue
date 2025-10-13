@@ -338,50 +338,6 @@ Crie um componente que:
 
 ---
 
-### Conectando com o Backend Flask
-
-Para esta aula, vamos fazer uma conexão simples:
-
-```vue
-<template>
-  <div>
-    <h2>Dados do Backend</h2>
-    <div v-if="carregando">Carregando...</div>
-    <ul v-else>
-      <li v-for="pessoa in pessoas" :key="pessoa.id">
-        {{ pessoa.nome }}
-      </li>
-    </ul>
-  </div>
-</template>
-
-<script>
-export default {
-  data() {
-    return {
-      pessoas: [],
-      carregando: true
-    }
-  },
-  async mounted() {
-    try {
-      // Simulando chamada à API Flask
-      // Na Aula 3 veremos como fazer isso direito
-      const response = await fetch('http://localhost:5000/api/dados')
-      this.pessoas = await response.json()
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error)
-      this.pessoas = []
-    } finally {
-      this.carregando = false
-    }
-  }
-}
-</script>
-```
-
----
-
 ### Arquivos Criados Nesta Aula
 
 Após completar esta aula, você terá:
@@ -392,34 +348,6 @@ Após completar esta aula, você terá:
 4. `src/components/Contador.vue` - Exercício 1
 5. `src/components/ListaTarefas.vue` - Exercício 2
 6. `src/components/CalculadoraIMC.vue` - Exercício 3
-
----
-
-### Comandos Git para Esta Aula
-
-```bash
-# Adicionar arquivos ao git
-git add .
-git commit -m "Aula 1 - Introdução ao Vue.js"
-
-# Criar branch da aula 1
-git checkout -b aula-01-introducao
-git push -u origin aula-01-introducao
-
-# Voltar para main
-git checkout main
-```
-
----
-
-### Checklist de Verificação
-
-- [ ] Projeto Vue rodando sem erros
-- [ ] Entendimento de template, script e style
-- [ ] Data binding funcionando
-- [ ] Event handling implementado
-- [ ] Exercícios práticos concluídos
-- [ ] Teste básico de conexão com Flask (opcional)
 
 ---
 
