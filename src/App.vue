@@ -38,25 +38,6 @@
             </div>
           </div>
 
-          <!-- Conexão com Backend -->
-          <div class="card mt-3">
-            <div class="card-header">
-              <h6 class="mb-0">
-                <i class="fas fa-plug me-2"></i>
-                Backend Flask
-              </h6>
-            </div>
-            <div class="card-body">
-              <p class="card-text small">
-                <span class="badge" :class="backendStatus.connected ? 'bg-success' : 'bg-danger'">
-                  {{ backendStatus.connected ? 'Conectado' : 'Desconectado' }}
-                </span>
-              </p>
-              <p class="small text-muted mb-0">
-                {{ backendStatus.message }}
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
