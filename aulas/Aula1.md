@@ -86,19 +86,30 @@ frontend_vue/
 
 ### Anatomia de um Componente Vue
 
-Um arquivo `.vue` contém três seções:
+#### 1. < template> — o visual (HTML)
 
+Aqui vai o que aparece na tela.
 ```vue
 <template>
-  <!-- HTML do componente -->
   <div class="hello">
     <h1>{{ titulo }}</h1>
     <button @click="incrementar">Cliques: {{ contador }}</button>
   </div>
 </template>
+```
+Tudo dentro de <template> é o markup(Marcação).
+As chaves {{ ... }} são interpolação: mostram valores dinâmicos do data() ou computed.
+- {{ titulo }} → mostra o texto definido no JavaScript.
+- {{ contador }} → mostra o número atual do contador.
 
+O @click="incrementar" é um event binding, ou seja, quando clicar no botão, ele chama o método incrementar().
+
+#### 2. < script> — A lógica (JavaScript)
+
+Aqui fica o “cérebro” do componente.
+
+```vue
 <script>
-// Lógica JavaScript
 export default {
   name: 'HelloWorld',
   data() {
@@ -114,9 +125,23 @@ export default {
   }
 }
 </script>
+```
 
+- export default é obrigatório — define o que o Vue vai usar quando importar o componente.
+- name: só dá um nome pro componente (útil pra debug e DevTools).
+- data(): função que retorna um objeto com os dados do componente.
+
+Esses dados são reativos — se mudarem, o Vue atualiza automaticamente o HTML.
+- methods: funções que o componente pode usar, como o incrementar().
+
+Quando o botão é clicado, this.contador++ muda o valor do contador e o Vue atualiza a tela sem recarregar a página.
+
+#### 3. < style scoped> — O visual (CSS)
+
+Aqui vem o estilo do componente:
+
+```vue
 <style scoped>
-/* CSS específico deste componente */
 .hello {
   text-align: center;
   padding: 20px;
@@ -129,6 +154,8 @@ button {
 }
 </style>
 ```
+- O scoped faz o CSS valer só pra este componente, evitando que ele afete outros.
+- Sem scoped, o CSS é global (pode vazar pra outros componentes).
 
 ---
 
