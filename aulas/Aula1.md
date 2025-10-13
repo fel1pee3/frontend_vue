@@ -188,6 +188,35 @@ export default {
 }
 </script>
 ```
+As chaves duplas {{ }} mostram o valor de uma variável do data().
+
+Se o valor mudar no JavaScript, o Vue atualiza o texto automaticamente na tela.
+
+v-bind: (ou só :) serve pra ligar um atributo HTML a uma variável do Vue.
+
+No exemplo acima:
+- O src da imagem vem do imagemUrl
+- O alt vem de descricao
+
+É como se fosse:
+```html
+<img src="/logo.png" alt="Logo Vue">
+```
+Mas se imagemUrl mudar, o src muda na hora também.
+
+```vue
+<input v-model="nome" placeholder="Digite seu nome">
+<p>Olá, {{ nome }}!</p>
+```
+Aqui é um binding de mão dupla:
+- Quando o usuário digita no input → o valor de nome muda.
+- Quando nome muda no JS → o input mostra o novo valor.
+
+Então se você digitar “Rodrigo” no campo, o Vue atualiza nome automaticamente e o <p> mostra:
+
+Olá, Rodrigo!
+
+Sem precisar usar um document.querySelector ou onChange — o Vue cuida de tudo.
 
 #### 2. **Event Handling**
 ```vue
