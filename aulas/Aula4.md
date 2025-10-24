@@ -1,934 +1,412 @@
 ## Aula 4 — Roteamento com Vue Router
 
-### Objetivos
-- Configurar Vue Router para navegação SPA
-- Criar rotas estáticas e dinâmicas
-- Implementar guards de navegação
-- Trabalhar com parâmetros de rota e query strings
-- Criar navegação programática e declarativa
-- Implementar lazy loading para otimização
+### O que é SPA (Single Page Application)?
 
----
-
-### Introdução ao Vue Router
-
-#### O que é SPA (Single Page Application)?
-
-Uma **SPA** é uma aplicação web que carrega uma única página HTML e dinamicamente atualiza o conteúdo conforme o usuário interage, sem recarregar a página inteira.
+Uma **SPA** é uma aplicação web que carrega uma única página HTML e atualiza o conteúdo dinamicamente conforme o usuário interage, sem recarregar a página inteira.
 
 **Vantagens:**
-- ✅ Navegação mais rápida (sem reload)
-- ✅ Melhor experiência do usuário
-- ✅ Menos requisições ao servidor
-- ✅ Interface mais fluida
+- Navegação mais rápida (sem reload)
+- Melhor experiência do usuário
+- Menos requisições ao servidor
 
-**Vue Router** é a biblioteca oficial para roteamento em aplicações Vue.js.
+O **Vue Router** é a biblioteca oficial de roteamento do Vue.js que nos permite criar SPAs.
 
----
+### Instalação e Configuração
 
-### Configuração Básica do Vue Router
+1. Instale o Vue Router:
+```bash
+npm install vue-router
+```
 
-#### `src/router/index.js`
+2. Configure o Router:
 
+No arquivo `src/router/index.js`:
 ```javascript
 import { createRouter, createWebHistory } from 'vue-router'
 
-// Importar views/componentes
-import Home from '@/views/Home.vue'
-import About from '@/views/About.vue'
-import Contact from '@/views/Contact.vue'
-import NotFound from '@/views/NotFound.vue'
-
-// Definição das rotas
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home,
-    meta: { 
-      title: 'Página Inicial',
-      description: 'Bem-vindo ao nosso sistema'
-    }
+    component: () => import('@/views/Home.vue')
   },
   {
     path: '/sobre',
     name: 'About',
-    component: About,
-    meta: { 
-      title: 'Sobre Nós',
-      requiresAuth: false
-    }
-  },
-  {
-    path: '/contato',
-    name: 'Contact',
-    component: Contact,
-    meta: { 
-      title: 'Contato',
-      requiresAuth: false
-    }
-  },
-  {
-    // Rota com parâmetro
-    path: '/usuario/:id',
-    name: 'UserProfile',
-    component: () => import('@/views/UserProfile.vue'), // Lazy loading
-    props: true, // Passar parâmetros como props
-    meta: { 
-      title: 'Perfil do Usuário',
-      requiresAuth: true
-    }
-  },
-  {
-    // Rotas aninhadas
-    path: '/produtos',
-    name: 'Products',
-    component: () => import('@/views/products/ProductsLayout.vue'),
-    children: [
-      {
-        path: '',
-        name: 'ProductsList',
-        component: () => import('@/views/products/ProductsList.vue')
-      },
-      {
-        path: ':id',
-        name: 'ProductDetail',
-        component: () => import('@/views/products/ProductDetail.vue'),
-        props: true
-      },
-      {
-        path: 'categoria/:categoria',
-        name: 'ProductsByCategory',
-        component: () => import('@/views/products/ProductsByCategory.vue'),
-        props: true
-      }
-    ]
-  },
-  {
-    // Redirecionamento
-    path: '/admin',
-    redirect: '/dashboard'
-  },
-  {
-    // Rota catch-all para 404
-    path: '/:pathMatch(.*)*',
-    name: 'NotFound',
-    component: NotFound
+    component: () => import('@/views/About.vue')
   }
 ]
 
-// Criar instância do router
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes,
-  scrollBehavior(to, from, savedPosition) {
-    // Comportamento de scroll
-    if (savedPosition) {
-      return savedPosition
-    } else if (to.hash) {
-      return { el: to.hash }
-    } else {
-      return { top: 0 }
-    }
-  }
-})
-
-// Guards globais
-router.beforeEach((to, from, next) => {
-  // Atualizar título da página
-  document.title = to.meta.title || 'Minha App Vue'
-  
-  // Verificar autenticação (simulado)
-  const isAuthenticated = localStorage.getItem('authToken')
-  
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    next('/login')
-  } else {
-    next()
-  }
-})
-
-// Guard após navegação
-router.afterEach((to, from) => {
-  console.log(`Navegou de ${from.name} para ${to.name}`)
+  history: createWebHistory(),
+  routes
 })
 
 export default router
 ```
 
----
+3. Ative o Router:
 
-### Views/Páginas Principais
+No arquivo `src/main.js`:
+```javascript
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
 
-#### `src/views/Home.vue`
+const app = createApp(App)
+app.use(router)
+app.mount('#app')
+```
+
+### Tipos de Navegação no Vue Router
+
+O Vue Router oferece duas formas principais de navegação, cada uma com seus casos de uso específicos:
+
+#### 1. Navegação Declarativa (router-link)
+
+O componente `router-link` é ideal para links de navegação fixos e diretos:
 
 ```vue
-<template>
-  <div class="home">
-    <div class="hero-section">
-      <div class="container text-center py-5">
-        <h1 class="display-4 text-primary mb-4">
-          <i class="fas fa-home me-3"></i>
-          Bem-vindo ao Vue Router
-        </h1>
-        <p class="lead mb-4">
-          Explore as funcionalidades de roteamento do Vue.js
-        </p>
-        
-        <!-- Navegação com router-link -->
-        <div class="d-flex justify-content-center gap-3 flex-wrap">
-          <router-link to="/sobre" class="btn btn-primary">
-            <i class="fas fa-info-circle me-2"></i>
-            Sobre Nós
-          </router-link>
-          
-          <router-link to="/produtos" class="btn btn-outline-primary">
-            <i class="fas fa-shopping-bag me-2"></i>
-            Ver Produtos
-          </router-link>
-          
-          <router-link to="/contato" class="btn btn-success">
-            <i class="fas fa-envelope me-2"></i>
-            Contato
-          </router-link>
-        </div>
-      </div>
-    </div>
+<!-- Link simples -->
+<router-link to="/">Home</router-link>
 
-    <!-- Navegação Programática -->
-    <div class="container mt-5">
-      <div class="card">
-        <div class="card-header">
-          <h3>
-            <i class="fas fa-code me-2"></i>
-            Navegação Programática
-          </h3>
-        </div>
-        <div class="card-body">
-          <p>Teste diferentes formas de navegação:</p>
-          
-          <div class="row g-3">
-            <div class="col-md-4">
-              <button 
-                @click="navegarPara('/sobre')" 
-                class="btn btn-info w-100"
-              >
-                <i class="fas fa-arrow-right me-2"></i>
-                Push: Sobre
-              </button>
-            </div>
-            
-            <div class="col-md-4">
-              <button 
-                @click="substituirRota('/produtos')" 
-                class="btn btn-warning w-100"
-              >
-                <i class="fas fa-exchange-alt me-2"></i>
-                Replace: Produtos
-              </button>
-            </div>
-            
-            <div class="col-md-4">
-              <button 
-                @click="voltarPagina()" 
-                class="btn btn-secondary w-100"
-              >
-                <i class="fas fa-arrow-left me-2"></i>
-                Voltar
-              </button>
-            </div>
-          </div>
+<!-- Link com parâmetros -->
+<router-link :to="{ name: 'User', params: { id: 123 }}">
+  Ver Usuário
+</router-link>
 
-          <!-- Navegação com parâmetros -->
-          <div class="mt-4">
-            <h5>Navegação com Parâmetros:</h5>
-            <div class="input-group mb-3">
-              <input 
-                v-model="userId" 
-                type="number" 
-                class="form-control" 
-                placeholder="ID do usuário (ex: 123)"
-              >
-              <button 
-                @click="verPerfil" 
-                class="btn btn-primary"
-                :disabled="!userId"
-              >
-                Ver Perfil
-              </button>
-            </div>
-          </div>
+<!-- Link com query params -->
+<router-link :to="{ path: '/produtos', query: { categoria: 'eletronicos' }}">
+  Eletrônicos
+</router-link>
+```
 
-          <!-- Query Strings -->
-          <div class="mt-3">
-            <h5>Navegação com Query:</h5>
-            <div class="row g-2">
-              <div class="col-md-6">
-                <select v-model="selectedCategory" class="form-select">
-                  <option value="">Selecione categoria</option>
-                  <option value="eletronicos">Eletrônicos</option>
-                  <option value="roupas">Roupas</option>
-                  <option value="casa">Casa</option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <button 
-                  @click="buscarPorCategoria" 
-                  class="btn btn-success w-100"
-                  :disabled="!selectedCategory"
-                >
-                  Buscar Categoria
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+**Vantagens da Navegação Declarativa**:
 
-    <!-- Informações da Rota Atual -->
-    <div class="container mt-4">
-      <div class="card">
-        <div class="card-header">
-          <h4>
-            <i class="fas fa-info me-2"></i>
-            Informações da Rota Atual
-          </h4>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col-md-6">
-              <p><strong>Path:</strong> <code>{{ $route.path }}</code></p>
-              <p><strong>Name:</strong> <code>{{ $route.name }}</code></p>
-              <p><strong>Hash:</strong> <code>{{ $route.hash || 'Nenhum' }}</code></p>
-            </div>
-            <div class="col-md-6">
-              <p><strong>Params:</strong> <code>{{ JSON.stringify($route.params) }}</code></p>
-              <p><strong>Query:</strong> <code>{{ JSON.stringify($route.query) }}</code></p>
-              <p><strong>Meta:</strong> <code>{{ JSON.stringify($route.meta) }}</code></p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
+- Sintaxe mais simples e direta
+- Gerenciamento automático de classes ativas
+- Comportamento de link nativo (clique direito, etc.)
+- Melhor para SEO e acessibilidade
 
-<script>
-export default {
-  name: 'Home',
-  data() {
-    return {
-      userId: '',
-      selectedCategory: ''
-    }
+**Casos de Uso**:
+
+- Menus de navegação
+- Links consistentes
+- Breadcrumbs
+- Navegação principal do site
+
+#### 2. Navegação Programática (via código)
+
+Usar `this.$router` permite maior controle e navegação dinâmica:
+
+```javascript
+methods: {
+  // Navegação simples
+  irParaHome() {
+    this.$router.push('/')
   },
-  methods: {
-    // Navegação programática
-    navegarPara(path) {
-      this.$router.push(path)
-    },
-    
-    substituirRota(path) {
-      this.$router.replace(path)
-    },
-    
-    voltarPagina() {
-      this.$router.go(-1)
-    },
-    
-    verPerfil() {
-      if (this.userId) {
-        this.$router.push({
-          name: 'UserProfile',
-          params: { id: this.userId }
-        })
+
+  // Navegação com parâmetros
+  verPerfil(userId) {
+    this.$router.push({
+      name: 'User',
+      params: { id: userId }
+    })
+  },
+
+  // Navegação com query
+  buscarProdutos(filtros) {
+    this.$router.push({
+      path: '/produtos',
+      query: {
+        categoria: filtros.categoria,
+        ordem: filtros.ordenacao,
+        pagina: 1
       }
-    },
-    
-    buscarPorCategoria() {
-      this.$router.push({
-        name: 'ProductsByCategory',
-        params: { categoria: this.selectedCategory },
-        query: { 
-          ordenar: 'nome',
-          limite: 10 
-        }
+    })
+  },
+
+  // Controle de histórico
+  voltar() {
+    this.$router.go(-1)
+  }
+}
+```
+
+**Vantagens da Navegação Programática**:
+
+- Maior flexibilidade e controle
+- Navegação condicional
+- Manipulação de estados complexos
+- Integração com lógica de negócio
+
+**Casos de Uso**:
+
+- Formulários de busca
+- Redirecionamentos após ações
+- Navegação baseada em condições
+- Fluxos de autenticação
+
+### Monitoramento de Navegação
+
+O Vue Router permite monitorar mudanças de rota de diferentes formas:
+
+```javascript
+export default {
+  // 1. Usando watcher
+  watch: {
+    '$route'(to, from) {
+      console.log('Rota mudou:', { 
+        de: { nome: from.name, params: from.params }, 
+        para: { nome: to.name, params: to.params } 
       })
     }
   },
-  
-  // Watchers para mudanças de rota
-  watch: {
-    '$route'(to, from) {
-      console.log('Rota mudou:', { from: from.name, to: to.name })
-    }
-  },
-  
-  // Guards locais do componente
+
+  // 2. Usando guards do componente
   beforeRouteEnter(to, from, next) {
-    console.log('Entrando na Home')
+    // Chamado antes de entrar na rota
     next()
   },
-  
+
+  beforeRouteUpdate(to, from, next) {
+    // Chamado quando a rota muda mas o componente é reutilizado
+    next()
+  },
+
   beforeRouteLeave(to, from, next) {
-    if (confirm('Tem certeza que deseja sair da página inicial?')) {
-      next()
-    } else {
-      next(false)
-    }
+    // Chamado antes de sair da rota
+    next()
   }
 }
-</script>
-
-<style scoped>
-.hero-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  margin: -20px -15px 0;
-}
-
-.hero-section h1 {
-  color: white !important;
-}
-
-.btn {
-  transition: transform 0.2s ease;
-}
-
-.btn:hover {
-  transform: translateY(-2px);
-}
-
-code {
-  background: #f8f9fa;
-  padding: 2px 6px;
-  border-radius: 4px;
-  color: #e83e8c;
-}
-</style>
 ```
 
-#### `src/views/products/ProductsLayout.vue`
+**Informações Disponíveis**:
 
-```vue
-<template>
-  <div class="products-layout">
-    <div class="container mt-4">
-      <!-- Breadcrumb -->
-      <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item">
-            <router-link to="/">Home</router-link>
-          </li>
-          <li class="breadcrumb-item active">Produtos</li>
-        </ol>
-      </nav>
-
-      <!-- Header com navegação de produtos -->
-      <div class="card mb-4">
-        <div class="card-header">
-          <div class="d-flex justify-content-between align-items-center">
-            <h2>
-              <i class="fas fa-shopping-bag me-2"></i>
-              Produtos
-            </h2>
-            
-            <!-- Sub-navegação -->
-            <div class="btn-group" role="group">
-              <router-link 
-                to="/produtos" 
-                class="btn btn-outline-primary"
-                :class="{ active: $route.name === 'ProductsList' }"
-              >
-                <i class="fas fa-list me-2"></i>
-                Todos
-              </router-link>
-              
-              <router-link 
-                to="/produtos/categoria/eletronicos" 
-                class="btn btn-outline-primary"
-                :class="{ active: $route.params.categoria === 'eletronicos' }"
-              >
-                <i class="fas fa-laptop me-2"></i>
-                Eletrônicos
-              </router-link>
-              
-              <router-link 
-                to="/produtos/categoria/roupas" 
-                class="btn btn-outline-primary"
-                :class="{ active: $route.params.categoria === 'roupas' }"
-              >
-                <i class="fas fa-tshirt me-2"></i>
-                Roupas
-              </router-link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Conteúdo das rotas filhas -->
-      <div class="products-content">
-        <router-view />
-      </div>
-    </div>
-  </div>
-</template>
-
-<script>
-export default {
-  name: 'ProductsLayout'
-}
-</script>
-
-<style scoped>
-.btn-group .btn.active {
-  background-color: #0d6efd;
-  color: white;
-  border-color: #0d6efd;
-}
-
-.products-content {
-  min-height: 400px;
-}
-</style>
+- `$route.path`: Caminho atual
+- `$route.name`: Nome da rota
+- `$route.params`: Parâmetros da URL
+- `$route.query`: Query strings
+- `$route.hash`: Hash da URL
+- `$route.meta`: Metadados da rota
 ```
 
-#### `src/views/products/ProductsList.vue`
+### Rotas com Parâmetros
 
+1. **Definindo a rota**:
+```javascript
+{
+  path: '/usuario/:id',
+  name: 'User',
+  component: () => import('@/views/User.vue'),
+  props: true  // Passa parâmetros como props
+}
+```
+
+2. **Usando a rota**:
 ```vue
-<template>
-  <div class="products-list">
-    <div class="row">
-      <div class="col-md-8">
-        <h3>Lista de Produtos</h3>
-        <p class="text-muted">Todos os produtos disponíveis</p>
-        
-        <div class="row">
-          <div 
-            v-for="produto in produtos" 
-            :key="produto.id"
-            class="col-md-6 mb-3"
-          >
-            <div class="card h-100">
-              <div class="card-body">
-                <h5 class="card-title">{{ produto.nome }}</h5>
-                <p class="card-text">{{ produto.descricao }}</p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <strong class="text-primary">R$ {{ produto.preco.toFixed(2) }}</strong>
-                  <router-link 
-                    :to="{ name: 'ProductDetail', params: { id: produto.id } }"
-                    class="btn btn-sm btn-primary"
-                  >
-                    Ver Detalhes
-                  </router-link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="col-md-4">
-        <div class="card">
-          <div class="card-header">
-            <h5>Filtros</h5>
-          </div>
-          <div class="card-body">
-            <div class="mb-3">
-              <label class="form-label">Buscar:</label>
-              <input v-model="filtros.busca" type="text" class="form-control">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Preço máximo:</label>
-              <input v-model="filtros.precoMax" type="number" class="form-control">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
+<router-link :to="{ name: 'User', params: { id: 123 }}">
+  Ver usuário
+</router-link>
+```
 
-<script>
+3. **Acessando parâmetros**:
+```javascript
+// No componente User.vue
 export default {
-  name: 'ProductsList',
-  data() {
-    return {
-      produtos: [
-        { id: 1, nome: 'Smartphone', descricao: 'Celular moderno', preco: 899.99 },
-        { id: 2, nome: 'Notebook', descricao: 'Laptop para trabalho', preco: 2499.99 },
-        { id: 3, nome: 'Headphone', descricao: 'Fone de ouvido sem fio', preco: 299.99 },
-        { id: 4, nome: 'Monitor', descricao: 'Tela 24 polegadas', preco: 599.99 }
-      ],
-      filtros: {
-        busca: '',
-        precoMax: null
-      }
-    }
+  props: ['id'],
+  created() {
+    console.log('ID do usuário:', this.id)
   }
 }
-</script>
 ```
 
----
+### Estrutura dos Componentes
+
+Nossa aplicação é dividida em três componentes principais, cada um com sua responsabilidade específica:
+
+#### 1. Layout Principal (App.vue)
+
+O componente App serve como nosso layout principal e implementa:
+
+- **Navegação Global**: 
+  - Barra de navegação consistente
+  - Links principais do aplicativo
+  - Estilos e animações de transição
+
+- **Painel de Informações da Rota**:
+  - Exibição em tempo real dos dados da rota atual
+  - Visualização de parâmetros e query strings
+  - Monitoramento de mudanças via watcher
+
+#### 2. Página Inicial (Home.vue)
+
+O componente Home demonstra os diferentes tipos de navegação disponíveis no Vue Router:
+
+- **Navegação Declarativa (router-link)**:
+  - Links simples e diretos (`<router-link to="/sobre">`)
+  - Links com parâmetros (`<router-link :to="{ name: 'User', params: { id: 1 } }">`)
+  - Estilização e classes ativas automáticas
+
+- **Navegação Programática (métodos)**:
+  - Navegação via código (`this.$router.push()`)
+  - Passagem de parâmetros complexos
+  - Manipulação de histórico
+  - Redirecionamentos condicionais
+
+#### 2. Página Sobre (About.vue)
+
+Um componente simples que demonstra:
+
+- **Navegação Básica**:
+  - Retorno à página inicial
+  - Exemplo de conteúdo estático
+  - Demonstração de transições
+
+#### 3. Página de Usuário (User.vue)
+
+Um componente que demonstra o uso de parâmetros:
+
+- **Funcionalidades**:
+  - Recebimento de ID via parâmetro
+  - Exibição de dados dinâmicos
+  - Navegação programática
+
+### Estrutura do Projeto
+
+Nossa aplicação está organizada da seguinte forma:
+
+```plaintext
+src/
+  views/          # Componentes de página
+    Home.vue      # Página inicial com exemplos de navegação
+    About.vue     # Página "Sobre" com exemplo de conteúdo estático
+    User.vue      # Página de usuário com exemplo de parâmetros
+  router/
+    index.js      # Configuração das rotas
+  App.vue         # Componente principal com layout e monitoramento de rotas
+```
+
+### Padrões e Boas Práticas
+
+2. **Organização dos Componentes**:
+- Separação clara entre template, script e estilos
+- Uso apropriado de props e métodos
+- Implementação de guards quando necessário
+
+3. **Padrões de Código**:
+- Nomes descritivos para rotas e componentes
+- Uso consistente de estilos
+- Comentários explicativos em seções complexas
 
 ### Guards de Navegação
 
+Os Guards são funções que permitem controlar o fluxo de navegação. Existem três tipos:
+
 #### Guards Globais
+- `beforeEach`: Executado antes de qualquer navegação
+- `beforeResolve`: Executado após a resolução dos componentes
+- `afterEach`: Executado após a conclusão da navegação
 
-```javascript
-// router/index.js - Guards globais
-
-// Antes de cada navegação
-router.beforeEach(async (to, from, next) => {
-  console.log('Navegando para:', to.name)
-  
-  // Loading global
-  showLoadingBar()
-  
-  // Verificar autenticação
-  if (to.meta.requiresAuth) {
-    const token = localStorage.getItem('authToken')
-    if (!token) {
-      next('/login')
-      return
-    }
-    
-    // Verificar se token ainda é válido
-    try {
-      await validateToken(token)
-    } catch (error) {
-      localStorage.removeItem('authToken')
-      next('/login')
-      return
-    }
-  }
-  
-  // Verificar permissões específicas
-  if (to.meta.role && !hasPermission(to.meta.role)) {
-    next('/unauthorized')
-    return
-  }
-  
-  next()
-})
-
-// Resolver guards
-router.beforeResolve(async (to, from, next) => {
-  // Carregar dados necessários antes da navegação
-  if (to.meta.preloadData) {
-    try {
-      await preloadRouteData(to)
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error)
-    }
-  }
-  next()
-})
-
-// Após navegação
-router.afterEach((to, from, failure) => {
-  hideLoadingBar()
-  
-  if (failure) {
-    console.error('Falha na navegação:', failure)
-  }
-  
-  // Analytics
-  trackPageView(to.path)
-})
-```
+**Casos de Uso**:
+- Verificação de autenticação
+- Loading global
+- Tracking de páginas
+- Verificação de permissões
 
 #### Guards por Rota
-
-```javascript
-// Nas definições de rota
-{
-  path: '/admin',
-  component: AdminPanel,
-  beforeEnter: (to, from, next) => {
-    if (isAdmin()) {
-      next()
-    } else {
-      next('/unauthorized')
-    }
-  }
-}
-```
+Úteis para:
+- Verificação de permissões específicas
+- Carregamento de dados necessários
+- Validações específicas da rota
 
 #### Guards de Componente
-
-```javascript
-export default {
-  beforeRouteEnter(to, from, next) {
-    // Antes de entrar na rota
-    // 'this' não está disponível
-    next(vm => {
-      // Acesso ao componente via 'vm'
-      vm.loadData()
-    })
-  },
-  
-  beforeRouteUpdate(to, from, next) {
-    // Quando a rota muda mas o componente é reutilizado
-    this.id = to.params.id
-    this.loadUserData()
-    next()
-  },
-  
-  beforeRouteLeave(to, from, next) {
-    // Antes de sair da rota
-    if (this.hasUnsavedChanges()) {
-      const answer = confirm('Tem alterações não salvas. Deseja continuar?')
-      if (answer) {
-        next()
-      } else {
-        next(false)
-      }
-    } else {
-      next()
-    }
-  }
-}
-```
-
----
-
-### Navegação Avançada
-
-#### Navegação Programática Completa
-
-```javascript
-// Diferentes formas de navegação
-methods: {
-  // String simples
-  navegarSimples() {
-    this.$router.push('/produtos')
-  },
-  
-  // Objeto com path
-  navegarComPath() {
-    this.$router.push({ path: '/produtos' })
-  },
-  
-  // Objeto com nome e parâmetros
-  navegarComNome() {
-    this.$router.push({ 
-      name: 'ProductDetail', 
-      params: { id: 123 } 
-    })
-  },
-  
-  // Com query strings
-  navegarComQuery() {
-    this.$router.push({
-      path: '/produtos',
-      query: { categoria: 'eletronicos', ordenar: 'preco' }
-    })
-  },
-  
-  // Replace (não adiciona ao histórico)
-  substituir() {
-    this.$router.replace('/nova-rota')
-  },
-  
-  // Navegar no histórico
-  voltarFrente() {
-    this.$router.go(-1) // Voltar
-    this.$router.go(1)  // Avançar
-  },
-  
-  // Navegação condicionada
-  async navegarCondicional() {
-    const canNavigate = await this.checkPermission()
-    if (canNavigate) {
-      this.$router.push('/rota-protegida')
-    } else {
-      this.$toast.error('Sem permissão para acessar')
-    }
-  }
-}
-```
-
----
+Implementados nos componentes:
+- `beforeRouteEnter`: Antes de entrar na rota
+- `beforeRouteUpdate`: Quando a rota é atualizada
+- `beforeRouteLeave`: Antes de sair da rota
 
 ### Exercícios Práticos
 
 #### Exercício 1: Sistema de Blog
-Crie uma estrutura de rotas para um blog:
-- `/blog` - Lista de posts
-- `/blog/:slug` - Post específico
-- `/blog/categoria/:categoria` - Posts por categoria
-- `/blog/autor/:autor` - Posts por autor
+Veja o arquivo `Exercicio1.md` para criar um blog usando Vue Router.
 
 #### Exercício 2: Painel Administrativo
-Implemente rotas protegidas:
-- Guards de autenticação
-- Verificação de roles (admin, editor, viewer)
-- Redirecionamentos baseados em permissão
+Estenda o exercício 1 adicionando:
+- Crie um formulário para adicionar novos posts
+- Adicione categorias aos posts
+- Implemente uma busca de posts
 
-#### Exercício 3: E-commerce Completo
-Estrutura de rotas para e-commerce:
-- Produtos com categorias e subcategorias
-- Carrinho de compras
-- Checkout multi-etapas
-- Histórico de pedidos
 
----
+#### Exercício 3: Melhorias de UX
+Adicione ao seu blog:
+- Animações de transição entre páginas
+- Loading bar durante navegação
+- Breadcrumbs para navegação
 
-### Integração com App.vue
 
-#### `src/App.vue` (versão com router)
+### Problemas Comuns e Soluções
 
-```vue
-<template>
-  <div id="app">
-    <!-- Loading Bar Global -->
-    <div v-if="$route.meta.loading" class="loading-bar">
-      <div class="progress">
-        <div class="progress-bar progress-bar-striped progress-bar-animated"></div>
-      </div>
-    </div>
+#### 1. Páginas em Branco
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div class="container">
-        <router-link to="/" class="navbar-brand">
-          <i class="fas fa-graduation-cap me-2"></i>
-          Vue Router Demo
-        </router-link>
-        
-        <div class="navbar-nav ms-auto">
-          <router-link to="/" class="nav-link">Home</router-link>
-          <router-link to="/sobre" class="nav-link">Sobre</router-link>
-          <router-link to="/produtos" class="nav-link">Produtos</router-link>
-          <router-link to="/contato" class="nav-link">Contato</router-link>
-        </div>
-      </div>
-    </nav>
+Se suas páginas estão aparecendo em branco, verifique os seguintes pontos:
 
-    <!-- Conteúdo Principal -->
-    <main class="main-content">
-      <router-view v-slot="{ Component }">
-        <transition name="page" mode="out-in">
-          <component :is="Component" />
-        </transition>
-      </router-view>
-    </main>
-    
-    <!-- Footer -->
-    <footer class="bg-light text-center py-3 mt-auto">
-      <div class="container">
-        <p class="text-muted mb-0">
-          Aula 4 - Vue Router | Rota atual: {{ $route.name }}
-        </p>
-      </div>
-    </footer>
-  </div>
-</template>
+**Configuração do Router no main.js**:
 
-<script>
-export default {
-  name: 'App'
-}
-</script>
+```javascript
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'  // Não esqueça de importar
+import './style.css'
 
-<style>
-#app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.main-content {
-  flex: 1;
-  padding: 20px 0;
-}
-
-/* Transições de página */
-.page-enter-active,
-.page-leave-active {
-  transition: all 0.3s ease;
-}
-
-.page-enter-from {
-  opacity: 0;
-  transform: translateX(30px);
-}
-
-.page-leave-to {
-  opacity: 0;
-  transform: translateX(-30px);
-}
-
-/* Navbar active links */
-.navbar-nav .router-link-active {
-  background-color: rgba(255,255,255,0.1);
-  border-radius: 4px;
-}
-
-/* Loading bar */
-.loading-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 9999;
-}
-
-.progress {
-  height: 3px;
-  border-radius: 0;
-}
-</style>
+const app = createApp(App)
+app.use(router)  // Certifique-se de ativar o router
+app.mount('#app')
 ```
 
----
+**Caminhos de Importação**:
 
-### Comandos Git
+No `router/index.js`, se você não configurou o alias `@`, use caminhos relativos:
 
-```bash
-# Criar branch da aula 4
-git checkout master
-git checkout -b aula-04-roteamento
+```javascript
+// Ao invés de:
+component: () => import('@/views/Home.vue')
 
-# Implementar todos os arquivos da aula
-git add .
-git commit -m "Aula 4 - Roteamento completo com Vue Router"
-git push -u origin aula-04-roteamento
+// Use:
+component: () => import('../views/Home.vue')
 ```
 
----
+**Estrutura de Arquivos**:
 
-### Checklist de Verificação
+Certifique-se de que todos os componentes existem nos caminhos corretos:
 
-- [ ] Vue Router configurado
-- [ ] Rotas básicas funcionando
-- [ ] Rotas com parâmetros implementadas
-- [ ] Rotas aninhadas criadas
-- [ ] Guards de navegação funcionando
-- [ ] Navegação programática implementada
-- [ ] Lazy loading configurado
-- [ ] Transições de página aplicadas
-- [ ] Breadcrumbs funcionando
-- [ ] Links ativos destacados
+```plaintext
+src/
+  views/
+    Home.vue
+    About.vue
+    User.vue
+```
 
----
+#### 2. Erros de Navegação
 
-### Próxima Aula
+Para resolver problemas de navegação, verifique:
+
+- Verifique se o `<router-view>` está presente no App.vue
+- Certifique-se de que os nomes das rotas correspondem aos usados na navegação
+- Confirme se os parâmetros obrigatórios estão sendo passados
+
+### Próximos Passos
+
+Agora que você entende os conceitos básicos do Vue Router e como resolver problemas comuns, você pode:
+
+1. Explorar a documentação oficial para recursos avançados
+2. Implementar autenticação em suas rotas
+3. Criar layouts mais complexos com rotas aninhadas
+4. Usar lazy loading para melhorar performance
 
 Na **Aula 5** veremos:
-- Formulários reativos avançados
-- Validações client-side
-- Componentes de formulário customizados
-- Integração com APIs de validação
-- Upload de arquivos
 
-### Conceitos Importantes
-
-1. **SPA**: Uma página, múltiplas views
-2. **Guards**: Controle de acesso às rotas
-3. **Lazy Loading**: Carregamento sob demanda
-4. **Transições**: Animações entre páginas
-5. **Meta Fields**: Dados adicionais das rotas
+- Formulários reativos
+- Validações
+- Integração com APIs
