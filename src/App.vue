@@ -5,41 +5,19 @@
       <div class="container">
         <h1 class="mb-0">
           <i class="fas fa-graduation-cap me-2"></i>
-          Frontend Vue.js - Aula 1
+          Frontend Vue.js - Aula 03
         </h1>
-        <p class="mb-0 opacity-75">Introdução ao Vue.js</p>
+        <p class="mb-0 opacity-75">Consumindo APIs</p>
       </div>
     </header>
 
     <!-- Conteúdo principal -->
     <div class="container">
-      <div class="row">
-        <div class="col-md-8">
-          <!-- Componente principal da aula -->
-          <HelloWorld />
-        </div>
-        
-        <div class="col-md-4">
-          <!-- Sidebar com informações -->
-          <div class="card">
-            <div class="card-header">
-              <h5 class="mb-0">
-                <i class="fas fa-info-circle me-2"></i>
-                Aula 1 - Conceitos
-              </h5>
-            </div>
-            <div class="card-body">
-              <ul class="list-unstyled">
-                <li><i class="fas fa-check text-success me-2"></i>Reatividade</li>
-                <li><i class="fas fa-check text-success me-2"></i>Data Binding</li>
-                <li><i class="fas fa-check text-success me-2"></i>Event Handling</li>
-                <li><i class="fas fa-check text-success me-2"></i>Componentes</li>
-              </ul>
-            </div>
-          </div>
-
-        </div>
-      </div>
+      <TestarConexao />
+      <hr>
+      <BuscarDados />
+      <hr>
+      <CRUDProdutos />
     </div>
 
     <!-- Footer -->
@@ -57,12 +35,16 @@
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import TestarConexao from './components/TestarConexao.vue'
+import BuscarDados from './components/BuscarDados.vue'
+import CRUDProdutos from './components/CRUDProdutos.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    TestarConexao,
+    BuscarDados,
+    CRUDProdutos
   }
 }
 </script>
